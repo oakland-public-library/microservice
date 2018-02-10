@@ -10,8 +10,14 @@ config.read('microservice.conf')
 API_KEY = config['sierra_client_api']['api_key']
 API_SECRET = config['sierra_client_api']['api_secret']
 
-print("authenticating")
-session = sierra.auth(API_KEY, API_SECRET)
+
+def auth():
+    print("authenticating")
+    session = sierra.auth(API_KEY, API_SECRET)
+    return session
+
+
+session = auth()
 
 print("getting patron record by barcode")
 barcode = 22141012432304
@@ -21,4 +27,4 @@ print(r.text)
 print("getting patrons expiring on date")
 date = datetime.date(2018, 12, 25)
 r = sierra.patrons_expiring_on_date(session, date)
-print(r.text)
+print(r)
