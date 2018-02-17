@@ -9,10 +9,23 @@ api_token_url = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4/token"
 api_limit = 999999999
 
 
-class Patron:
+class PatronRecord:
     def __init__(self):
         self.api_data = None
-        self.patron_number = None
+        self.patron_id = None
+
+
+class BibRecord:
+    def __init__(self):
+        self.api_data = None
+        self.record_id = None
+
+
+class HoldRecord:
+    def __init__(self):
+        self.api_data = None
+        self.hold_id = None
+        self.frozen = None
 
 
 def authenticate(api_key, api_secret):
@@ -23,21 +36,53 @@ def authenticate(api_key, api_secret):
     return session
 
 
-def patron_by_barcode(session, barcode):
+def bib_record_by_id(session, record_id):
+    """Return the record number(s) for the given barcode number."""
+    r = session.get(api_url_base + "/bibs/{}".format((record_id)))
+    bib = BibRecord()
+    bib.api_data = json.loads(r.text)
+    bib.record_id = bib.api_data['id']
+    return bib
+
+
+def hold_record_by_id(session, hold_id):
+    """Return the hold record for the given hold ID."""
+    r = session.get(api_url_base + "/patrons/holds/{}".format(str(hold_id)))
+    h = HoldRecord()
+    h.api_data = json.loads(r.text)
+    h.hold_id = h.api_data['id'].split('/')[-1]
+    h.record_type = h.api_data['recordType']
+    h.frozen = h.api_data['frozen']
+    h.expiration_date = datetime.strptime(h.api_data['notNeededAfterDate'],
+                                          '%Y-%m-%d').date()
+    return h
+
+
+def patron_record_by_id(session, patron_id):
+    """Return the patron record for the given patron ID."""
+    r = session.get(api_url_base + "/patrons/{}".format(str(patron_id)))
+    p = PatronRecord()
+    p.api_data = json.loads(r.text)
+    p.patron_id = p.api_data['id']
+    p.birth_date = datetime.strptime(p.api_data['birthDate'],
+                                     '%Y-%m-%d').date()
+    return p
+
+
+def patron_record_by_barcode(session, barcode):
     """Return the record number(s) for the given barcode number."""
     r = session.get(api_url_base + "/patrons/find?barcode=" + str(barcode))
-    p = Patron()
+    p = PatronRecord()
     p.api_data = json.loads(r.text)
-    p.patron_number = p.api_data['id']
+    p.patron_id = p.api_data['id']
     p.birthdate = datetime.strptime(p.api_data['birthDate'], '%Y-%m-%d')
     return p
 
 
-def patron_holds(session, patron):
-    """Return a list of hold id for the given patron."""
-    response = session.get("{}/patrons/{}/holds".format(api_url_base,
-                                                        patron.patron_number))
-    entries = json.loads(response.text)['entries']
+def patron_holds(session, patron_id):
+    """Return a list of hold IDs for the given patron."""
+    r = session.get("{}/patrons/{}/holds".format(api_url_base, patron_id))
+    entries = json.loads(r.text)['entries']
     return [x['id'].split('/')[-1] for x in entries]
 
 
@@ -63,6 +108,80 @@ def patrons_expiring_on_date(session, date):
     url = "/patrons/query?offset=0&limit=" + str(api_limit)
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
-    response = session.post(api_url_base + url, data=data, headers=headers)
-    entries = json.loads(response.text)['entries']
+    r = session.post(api_url_base + url, data=data, headers=headers)
+    entries = json.loads(r.text)['entries']
     return [x['link'].split('/')[-1] for x in entries]
+
+
+def patrons_with_frozen_holds_expiring_on_date(session, date):
+    """Get patrons with expiring frozen holds.
+
+    Returns an array of patron records, each with its holds attribute
+    containing an array of hold records whose status is frozen and whose
+    expiration date is the same as the date passed to this function.
+    """
+
+    query = {
+        "queries": [
+            {
+                "target": {
+                    "record": {
+                        "type": "patron"
+                    },
+                    "id": 80807
+                },
+                "expr": {
+                    "op": "equals",
+                    "operands": [
+                        # dates go in to queries as MM-DD-YY,
+                        # but come out in ISO-8601 (YYYY-MM-DD)
+                        date.strftime("%m/%d/%Y"),
+                        ""
+                    ]
+                }
+            },
+            "and",
+            {
+                "target": {
+                    "record": {
+                        "type": "patron"
+                    },
+                    "id": 80804
+                },
+                "expr": {
+                    "op": "equals",
+                    "operands": [
+                        "true",
+                        ""
+                    ]
+                }
+            }
+        ]
+    }
+
+    url = "/patrons/query?offset=0&limit=" + str(api_limit)
+    headers = {'content-type': 'application/json'}
+    data = json.dumps(query)
+    r = session.post(api_url_base + url, data=data, headers=headers)
+    entries = json.loads(r.text)['entries']
+
+    # Now we have a list of patron IDs, where each patron has at least one
+    # frozen hold expiring on the specified date.
+    patron_ids = [x['link'].split('/')[-1] for x in entries]
+
+    patrons = []
+    for patron_id in patron_ids:
+        patron = patron_record_by_id(session, patron_id)
+        patron.holds = []
+        holds = patron_holds(session, patron_id)
+        for hold_id in holds:
+            hold = hold_record_by_id(session, hold_id)
+
+            # Since the patron may have other holds are either not expiring,
+            # or not frozen (or both) check for that here, and append only
+            # the expiring frozen holds to our list.
+            if hold.frozen:
+                if date == hold.expiration_date:
+                    patron.holds.append(hold)
+    patrons.append(patron)
+    return(patrons)
