@@ -6,7 +6,7 @@ import json
 
 api_url_base = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4"
 api_token_url = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4/token"
-api_limit = 999999999
+api_limit = 10
 
 
 class PatronRecord:
@@ -185,3 +185,31 @@ def patrons_with_frozen_holds_expiring_on_date(session, date):
                     patron.holds.append(hold)
     patrons.append(patron)
     return(patrons)
+
+
+def patrons_in_zipcode(session, zipcode):
+    """Get patrons in the specified zip code."""
+
+    query = {
+        "target": {
+            "record": {
+                "type": "patron"
+            },
+            "id": 80010
+        },
+        "expr": {
+            "op": "equals",
+            "operands": [
+                str(zipcode),
+                ""
+            ]
+        }
+    }
+
+    url = "/patrons/query?offset=0&limit={}".format(str(10))
+    headers = {'content-type': 'application/json'}
+    data = json.dumps(query)
+    r = session.post(api_url_base + url, data=data, headers=headers)
+    entries = json.loads(r.text)['entries']
+    patron_ids = [x['link'].split('/')[-1] for x in entries]
+    return patron_ids
