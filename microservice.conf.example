@@ -1,4 +1,10 @@
+[sierra_api_client]
+api_key =
+api_secret =
 
-[sierra_client_api]
-api_key = .....
-api_secret = .....
+[sierra_dna_client]
+port =
+host =
+db =
+user =
+pass =
