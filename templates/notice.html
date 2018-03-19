@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Message from the Oakland Public Library</title>
+    <style>
+    </style>
+  </head>
+  <body>
+    <h1>A List of Items</h1>
+    <ul>
+      {% for item in items %}
+      <li>{{item}}</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
