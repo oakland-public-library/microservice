@@ -54,7 +54,11 @@ def hold_record_by_id(session, hold_id):
     h.record_type = h.api_data['recordType']
     h.frozen = h.api_data['frozen']
 
-    h.expiration_date = datetime.strptime(h.api_data['notNeededAfterDate'], '%Y-%m-%d').date() if 'notNeededAfterDate' in h.api_data else None
+    if 'notNeededAfterDate' in h.api_data:
+        h.expiration_date = datetime.strptime(h.api_data['notNeededAfterDate'],
+                                              '%Y-%m-%d').date()
+    else:
+        h.expiration_date = None
     return h
 
 
