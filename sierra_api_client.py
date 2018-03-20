@@ -53,9 +53,33 @@ def hold_record_by_id(session, hold_id):
     h.hold_id = h.api_data['id'].split('/')[-1]
     h.record_type = h.api_data['recordType']
     h.frozen = h.api_data['frozen']
-    h.expiration_date = datetime.strptime(h.api_data['notNeededAfterDate'],
-                                          '%Y-%m-%d').date()
+
+    h.expiration_date = datetime.strptime(h.api_data['notNeededAfterDate'], '%Y-%m-%d').date() if 'notNeededAfterDate' in h.api_data else None
     return h
+
+
+def freeze_hold(session, hold_id):
+    """Return a list of patron record numbers expiring on the given date."""
+    query = {
+        "freeze": True
+    }
+    headers = {'content-type': 'application/json'}
+    data = json.dumps(query)
+    r = session.put(api_url_base + "/patrons/holds/{}".format(str(hold_id)),
+                    data=data, headers=headers)
+    return r
+
+
+def unfreeze_hold(session, hold_id):
+    """Return a list of patron record numbers expiring on the given date."""
+    query = {
+        "freeze": False
+    }
+    headers = {'content-type': 'application/json'}
+    data = json.dumps(query)
+    r = session.put(api_url_base + "/patrons/holds/{}".format(str(hold_id)),
+                    data=data, headers=headers)
+    return r
 
 
 def patron_record_by_id(session, patron_id):
