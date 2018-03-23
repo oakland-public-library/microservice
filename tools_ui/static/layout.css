@@ -1,0 +1,79 @@
+@font-face {
+  font-family: 'pixel-font';
+  src: url('BerkeliumIIHGR.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'pixel-font-2';
+  src: url('BerkeliumIIDHR.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'pixel-font-3';
+  src: url('Berkelium64.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'pixel-font-4';
+  src: url('BBSesque.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'pixel-font-5';
+  src: url('Born2bSportyV2.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'pixel-font-6';
+  src: url('Nintendo-DS-BIOS.ttf') format('truetype');
+}
+
+body {
+  font-family: 'pixel-font-6', sans-serif;
+  font-size: 16px;
+}
+
+#content {
+  border: 1px solid #aaa;
+  padding: 12px;
+  overflow: scroll;
+}
+
+#brand {
+  float: left;
+  margin: 0;
+}
+
+.search-form {
+  margin: 0 5px;
+}
+
+.search-form form {
+  margin: 0;
+}
+
+.btn-menu {
+  margin: 4px 5px 0 0;
+  float: right;
+}
+
+.btn-menu a, .btn-menu input {
+  padding: 1px 1px !important;
+  border-radius: 0 !important;
+}
+
+.btn, textarea, input[type], button, .model-list {
+  border-radius: 0;
+}
+
+.model-list {
+  border-radius: 0;
+}
+
+.nav-pills li > a {
+  border-radius: 0;
+}
+
+.navbar-brand {
+  font-size: 32px;
+}

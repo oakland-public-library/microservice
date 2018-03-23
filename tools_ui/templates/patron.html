@@ -1,0 +1,17 @@
+<!doctype html>
+<head>
+  <title>Patron Record</title>
+  <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
+</head>
+{% if patron %}
+<h2>Patron Record {{ patron.patron_id }}{% if barcode %} (Barcode {{ barcode }}){% endif %}</h2>
+<h3>Hold Records</h3>
+<table>
+  <tr><td>Hold ID</td><td>Frozen</td></tr>
+  {% for hold in holds %}
+  <tr><td>{{ hold.hold_id }}</td><td>{{ hold.frozen }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<h2>no data</h2>
+{% endif %}
