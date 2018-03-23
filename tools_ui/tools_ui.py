@@ -25,11 +25,6 @@ DNA_USER = config['sierra_dna_client']['user']
 DNA_PASS = config['sierra_dna_client']['pass']
 
 
-@app.route('/')
-def root():
-    return 'Hello, World!'
-
-
 @app.route('/patron/<barcode>')
 def patron(barcode):
     print("authenticating with API server...")
@@ -40,11 +35,6 @@ def patron(barcode):
     holds = api.patron_holds(session, patron.patron_id)
     return render_template('patron.html', patron=patron, holds=holds,
                            barcode=barcode)
-
-
-@app.route('/test')
-def test():
-    return render_template('test.html')
 
 
 @app.route('/report')
