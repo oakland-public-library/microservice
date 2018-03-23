@@ -111,7 +111,11 @@ def patron_holds(session, patron_id):
     """Return a list of hold IDs for the given patron."""
     r = session.get("{}/patrons/{}/holds".format(api_url_base, patron_id))
     entries = json.loads(r.text)['entries']
-    return [x['id'].split('/')[-1] for x in entries]
+    ids = [x['id'].split('/')[-1] for x in entries]
+    holds = []
+    for i in ids:
+        holds.append(hold_record_by_id(session, i))
+    return holds
 
 
 def patrons_expiring_on_date(session, date):
