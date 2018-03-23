@@ -24,56 +24,23 @@
 }
 
 @font-face {
-  font-family: 'pixel-font-6';
-  src: url('Nintendo-DS-BIOS.ttf') format('truetype');
+  font-family: 'plex';
+  src: url('fonts/IBMPlexSansCondensed-Regular.ttf') format('truetype');
 }
 
 body {
-  font-family: 'pixel-font-6', sans-serif;
-  font-size: 16px;
+  font-family: 'plex', sans-serif;
+  font-weight: 400;
+  line-height: 1.2em;
 }
 
-#content {
-  border: 1px solid #aaa;
-  padding: 12px;
-  overflow: scroll;
+h1, h2 {
+  font-weight: 600;
 }
 
-#brand {
-  float: left;
-  margin: 0;
+h3, h4, h5, h6 {
+  font-weight: 500;
 }
 
-.search-form {
-  margin: 0 5px;
-}
-
-.search-form form {
-  margin: 0;
-}
-
-.btn-menu {
-  margin: 4px 5px 0 0;
-  float: right;
-}
-
-.btn-menu a, .btn-menu input {
-  padding: 1px 1px !important;
-  border-radius: 0 !important;
-}
-
-.btn, textarea, input[type], button, .model-list {
-  border-radius: 0;
-}
-
-.model-list {
-  border-radius: 0;
-}
-
-.nav-pills li > a {
-  border-radius: 0;
-}
-
-.navbar-brand {
-  font-size: 32px;
-}
+tr:nth-child(even) { background: #ccc }
+tr:nth-child(odd) { background: #fff }
