@@ -2,8 +2,10 @@
 
 import sierra_api_client as api
 import sierra_dna_client as dna
+import ils_report
 from flask import Flask
 from flask import render_template
+from flask import request
 import datetime
 import configparser
 from pprint import pprint
@@ -43,6 +45,14 @@ def patron(barcode):
 @app.route('/test')
 def test():
     return render_template('test.html')
+
+
+@app.route('/report')
+def report():
+    ratio = request.args.get('ratio', default=4)
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    report = ils_report.make_hdh(conn, ratio)
+    return render_template('hdh_report.html', report=report)
 
 
 app.run()

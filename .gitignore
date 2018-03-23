@@ -1,3 +1,4 @@
 __pycache__
 microservice.conf
-test_*
+test_*.py
+**/.#*
