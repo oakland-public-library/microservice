@@ -1,0 +1,18 @@
+<!doctype html>
+<head>
+  <title>High Demand Holds Report</title>
+  <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
+</head>
+<body>
+  <h2>High-demand Holds Report</h2>
+  {% if report %}
+  <table>
+    <tr>{% for cell in report.header %}<th>{{ cell.label }}</th>{% endfor %}</tr>
+    {% for row in report.data %}
+    <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <h2>no data</h2>
+  {% endif %}
+</body>
