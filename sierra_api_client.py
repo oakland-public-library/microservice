@@ -6,7 +6,7 @@ import json
 
 api_url_base = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4"
 api_token_url = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4/token"
-api_limit = 10
+api_limit = 1000
 
 
 class PatronRecord:
@@ -238,7 +238,7 @@ def patrons_in_zipcode(session, zipcode):
         }
     }
 
-    url = "/patrons/query?offset=0&limit={}".format(str(10))
+    url = "/patrons/query?offset=0&limit={}".format(str(api_limit))
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
     r = session.post(api_url_base + url, data=data, headers=headers)
