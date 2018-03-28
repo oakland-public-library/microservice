@@ -1,0 +1,17 @@
+<!doctype html>
+<head>
+  <title>Bibliographic Record</title>
+  <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
+</head>
+<body>
+  {% if record %}
+  <h2>Bibliographic Record {{ record.record_id }}</h2>
+  <table>
+  {% for x in record.api_data %}
+  <tr><td>{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+  {% endfor %}
+  </table>
+  {% else %}
+  <h2>no data</h2>
+  {% endif %}
+</body>
