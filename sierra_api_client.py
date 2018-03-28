@@ -37,7 +37,7 @@ def authenticate(api_key, api_secret):
 
 
 def bib_record_by_id(session, record_id):
-    """Return the record number(s) for the given barcode number."""
+    """Return a bib record for the given record number"""
     r = session.get(api_url_base + "/bibs/{}".format((record_id)))
     bib = BibRecord()
     bib.api_data = json.loads(r.text)
@@ -46,7 +46,7 @@ def bib_record_by_id(session, record_id):
 
 
 def hold_record_by_id(session, hold_id):
-    """Return the hold record for the given hold ID."""
+    """Return the hold record for the given hold ID"""
     r = session.get(api_url_base + "/patrons/holds/{}".format(str(hold_id)))
     h = HoldRecord()
     h.api_data = json.loads(r.text)
@@ -63,7 +63,7 @@ def hold_record_by_id(session, hold_id):
 
 
 def freeze_hold(session, hold_id):
-    """Return a list of patron record numbers expiring on the given date."""
+    """Return a list of patron record numbers expiring on the given date"""
     query = {
         "freeze": True
     }
@@ -75,7 +75,7 @@ def freeze_hold(session, hold_id):
 
 
 def unfreeze_hold(session, hold_id):
-    """Return a list of patron record numbers expiring on the given date."""
+    """Return a list of patron record numbers expiring on the given date"""
     query = {
         "freeze": False
     }
@@ -87,7 +87,7 @@ def unfreeze_hold(session, hold_id):
 
 
 def patron_record_by_id(session, patron_id):
-    """Return the patron record for the given patron ID."""
+    """Return the patron record for the given patron ID"""
     r = session.get(api_url_base + "/patrons/{}".format(str(patron_id)))
     p = PatronRecord()
     p.api_data = json.loads(r.text)
@@ -98,7 +98,7 @@ def patron_record_by_id(session, patron_id):
 
 
 def patron_record_by_barcode(session, barcode):
-    """Return the record number(s) for the given barcode number."""
+    """Return the record number(s) for the given barcode number"""
     r = session.get(api_url_base + "/patrons/find?barcode=" + str(barcode))
     p = PatronRecord()
     p.api_data = json.loads(r.text)
@@ -108,7 +108,7 @@ def patron_record_by_barcode(session, barcode):
 
 
 def patron_holds(session, patron_id):
-    """Return a list of hold IDs for the given patron."""
+    """Return a list of hold IDs for the given patron"""
     r = session.get("{}/patrons/{}/holds".format(api_url_base, patron_id))
     entries = json.loads(r.text)['entries']
     ids = [x['id'].split('/')[-1] for x in entries]
@@ -119,7 +119,7 @@ def patron_holds(session, patron_id):
 
 
 def patrons_expiring_on_date(session, date):
-    """Return a list of patron record numbers expiring on the given date."""
+    """Return a list of patron record numbers expiring on the given date"""
     query = {
         "target": {
             "record": {
@@ -220,7 +220,7 @@ def patrons_with_frozen_holds_expiring_on_date(session, date):
 
 
 def patrons_in_zipcode(session, zipcode):
-    """Get patrons in the specified zip code."""
+    """Get patrons in the specified zip code"""
 
     query = {
         "target": {
