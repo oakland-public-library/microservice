@@ -25,13 +25,17 @@ DNA_USER = config['sierra_dna_client']['user']
 DNA_PASS = config['sierra_dna_client']['pass']
 
 
+@app.route('/bib/<record_id>')
+def bib(record_id):
+    session = api.authenticate(API_KEY, API_SECRET)
+    record = api.bib_record_by_id(session, record_id.lstrip('b'))
+    return render_template('bib_record.html', record=record)
+
+
 @app.route('/patron/<barcode>')
 def patron(barcode):
-    print("authenticating with API server...")
     session = api.authenticate(API_KEY, API_SECRET)
-    print("getting patron record by barcode...")
     patron = api.patron_record_by_barcode(session, barcode)
-    print("getting holds for patron...")
     holds = api.patron_holds(session, patron.patron_id)
     return render_template('patron.html', patron=patron, holds=holds,
                            barcode=barcode)
