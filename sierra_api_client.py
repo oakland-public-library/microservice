@@ -12,32 +12,24 @@ patron_api_fields = {'fields': 'default,fixedFields'}
 
 
 class PatronRecord:
-    def __init__(self):
-        self.api_data = None
-        self.record_id = None
-
-    def load_api_data(self, d):
-        self.api_data = d
-        self.record_id = d['id']
-        self.birthdate = datetime.strptime(d['birthDate'], '%Y-%m-%d')
+    def __init__(self, api_data=None):
+        self.api_data = api_data
+        self.record_id = api_data['id']
+        self.birthdate = datetime.strptime(api_data['birthDate'], '%Y-%m-%d')
 
 
 class BibRecord:
-    def __init__(self):
-        self.api_data = None
-        self.record_id = None
-
-    def load_api_data(self, d):
-        self.api_data = d
-        self.record_id = d['id']
-        self.catalog_date = d.get('catalogDate', '-')
-        self.title = d['title'].title()
-        self.author = d['author']
-        self.material_type = d['materialType']['value']
-        self.material_type_code = d['materialType']['code']
-        self.publish_year = d.get('publishYear', '-')
-        self.available = d['available']
-        self.isbns = isbns_from_api_data(d)
+    def __init__(self, api_data=None):
+        self.api_data = api_data
+        self.record_id = api_data['id']
+        self.catalog_date = api_data.get('catalogDate', '-')
+        self.title = api_data['title'].title()
+        self.author = api_data['author']
+        self.material_type = api_data['materialType']['value']
+        self.material_type_code = api_data['materialType']['code']
+        self.publish_year = api_data.get('publishYear', '-')
+        self.available = api_data['available']
+        self.isbns = isbns_from_api_data(api_data)
         self.jacket_url = jacket_url_from_isbns(self.isbns)
         # bib.call = d[]
         # bib.publisher = d[]
@@ -63,8 +55,7 @@ def bib_record_by_id(session, record_id):
     p = {'fields': 'default,fixedFields,varFields,normTitle,normAuthor,orders,'
          'locations,available'}
     r = session.get(api_url_base + '/bibs/{}'.format((record_id)), params=p)
-    bib = BibRecord()
-    bib.load_api_data(json.loads(r.text))
+    bib = BibRecord(api_data=json.loads(r.text))
     return bib
 
 
@@ -112,8 +103,7 @@ def unfreeze_hold(session, hold_id):
 def patron_record_by_id(session, record_id):
     """Return the patron record for the given patron ID"""
     r = session.get(api_url_base + '/patrons/{}'.format(str(record_id)))
-    p = PatronRecord()
-    p.load_api_data(json.loads(r.text))
+    p = PatronRecord(api_data=json.loads(r.text))
     return p
 
 
@@ -121,8 +111,7 @@ def patron_record_by_barcode(session, barcode):
     """Return the record number(s) for the given barcode number"""
     r = session.get(api_url_base + '/patrons/find?barcode={}'.format(
         str(barcode)), params=patron_api_fields)
-    p = PatronRecord()
-    p.load_api_data(json.loads(r.text))
+    p = PatronRecord(api_data=json.loads(r.text))
     return p
 
 

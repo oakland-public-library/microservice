@@ -29,9 +29,7 @@ DNA_PASS = config['sierra_dna_client']['pass']
 @app.route('/bib/<record_id>')
 def bib(record_id):
     if record_id == 'test':
-        data = json.load(open('bib.json'))
-        record = api.BibRecord()
-        record.load_api_data(data)
+        record = api.BibRecord(api_data=json.load(open('bib.json')))
     else:
         session = api.authenticate(API_KEY, API_SECRET)
         record = api.bib_record_by_id(session, record_id.lstrip('b'))
