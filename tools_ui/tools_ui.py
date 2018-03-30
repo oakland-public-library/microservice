@@ -9,6 +9,7 @@ from flask import request
 import datetime
 import configparser
 from pprint import pprint
+import json
 
 app = Flask(__name__)
 
@@ -27,17 +28,22 @@ DNA_PASS = config['sierra_dna_client']['pass']
 
 @app.route('/bib/<record_id>')
 def bib(record_id):
-    session = api.authenticate(API_KEY, API_SECRET)
-    record = api.bib_record_by_id(session, record_id.lstrip('b'))
+    if record_id == 'test':
+        data = json.load(open('bib.json'))
+        record = api.BibRecord()
+        record.load_api_data(data)
+    else:
+        session = api.authenticate(API_KEY, API_SECRET)
+        record = api.bib_record_by_id(session, record_id.lstrip('b'))
     return render_template('bib_record.html', record=record)
 
 
 @app.route('/patron/<barcode>')
 def patron(barcode):
     session = api.authenticate(API_KEY, API_SECRET)
-    patron = api.patron_record_by_barcode(session, barcode)
-    holds = api.patron_holds(session, patron.patron_id)
-    return render_template('patron.html', patron=patron, holds=holds,
+    record = api.patron_record_by_barcode(session, barcode)
+    holds = api.patron_holds(session, record.record_id)
+    return render_template('patron_record.html', record=record, holds=holds,
                            barcode=barcode)
 
 

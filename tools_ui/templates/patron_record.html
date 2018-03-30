@@ -4,15 +4,27 @@
   <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
 </head>
 <body>
-  {% if patron %}
-  <h2>Patron Record {{ patron.patron_id }}{% if barcode %} (Barcode {{ barcode }}){% endif %}</h2>
-  <h3>Hold Records</h3>
-  <table>
-    <tr><td>Hold ID</td><td>Frozen</td></tr>
-    {% for hold in holds %}
-    <tr><td>{{ hold.hold_id }}</td><td>{{ hold.frozen }}</td></tr>
-    {% endfor %}
-  </table>
+  {% if record %}
+  <h2>Patron Record {{ record.record_id }}{% if barcode %} (Barcode {{ barcode }}){% endif %}</h2>
+  <div class="record_info">
+    <h3>Hold Records</h3>
+    <table>
+      <tr><th>Hold ID</th><th>Frozen</th></tr>
+      {% for hold in holds %}
+      <tr><td>{{ hold.hold_id }}</td><td>{{ hold.frozen }}</td></tr>
+      {% endfor %}
+    </table>
+    {% if debug %}
+    <div class="api_data">
+      <hr />
+      <table>
+        {% for x in record.api_data %}
+        <tr><td class="field_name">{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </div>
   {% else %}
   <h2>no data</h2>
   {% endif %}

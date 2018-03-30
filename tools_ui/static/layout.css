@@ -1,46 +1,49 @@
 @font-face {
-  font-family: 'pixel-font';
-  src: url('BerkeliumIIHGR.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'pixel-font-2';
-  src: url('BerkeliumIIDHR.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'pixel-font-3';
-  src: url('Berkelium64.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'pixel-font-4';
-  src: url('BBSesque.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'pixel-font-5';
-  src: url('Born2bSportyV2.ttf') format('truetype');
+  font-family: 'plex';
+  font-weight: normal;
+  src: url('fonts/IBMPlexSansCondensed-Light.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'plex';
+  font-weight: bold;
   src: url('fonts/IBMPlexSansCondensed-Regular.ttf') format('truetype');
 }
 
 body {
   font-family: 'plex', sans-serif;
-  font-weight: 400;
-  line-height: 1.2em;
+  line-height: 1.3em;
 }
 
-h1, h2 {
-  font-weight: 600;
+hr {
+  border: 0;
+  border-bottom: 1px solid #ddd;
 }
 
-h3, h4, h5, h6 {
-  font-weight: 500;
-}
-
-tr:nth-child(even) { background: #ccc }
+tr:nth-child(even) { background: #ddd }
 tr:nth-child(odd) { background: #fff }
+
+.field_name {
+  font-weight: bold;
+}
+
+.record_info {
+  float: left;
+}
+
+.api_data {
+  float: left;
+}
+
+.jacket {
+  float: left;
+  padding: 3px;
+}
+
+.jacket img {
+  box-shadow: 0px 1px 2px 2px rgba(0, 0, 0, .4);
+  border-radius: 3px;
+  padding: 3px;
+  margin-left: 12px;
+  height: 300px;
+}

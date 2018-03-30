@@ -8,17 +8,39 @@ api_url_base = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4"
 api_token_url = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4/token"
 api_limit = 1000
 
+patron_api_fields = {'fields': 'default,fixedFields'}
+
 
 class PatronRecord:
     def __init__(self):
         self.api_data = None
-        self.patron_id = None
+        self.record_id = None
+
+    def load_api_data(self, d):
+        self.api_data = d
+        self.record_id = d['id']
+        self.birthdate = datetime.strptime(d['birthDate'], '%Y-%m-%d')
 
 
 class BibRecord:
     def __init__(self):
         self.api_data = None
         self.record_id = None
+
+    def load_api_data(self, d):
+        self.api_data = d
+        self.record_id = d['id']
+        self.catalog_date = d.get('catalogDate', '-')
+        self.title = d['title'].title()
+        self.author = d['author']
+        self.material_type = d['materialType']['value']
+        self.material_type_code = d['materialType']['code']
+        self.publish_year = d.get('publishYear', '-')
+        self.available = d['available']
+        self.isbns = isbns_from_api_data(d)
+        self.jacket_url = jacket_url_from_isbns(self.isbns)
+        # bib.call = d[]
+        # bib.publisher = d[]
 
 
 class HoldRecord:
@@ -32,22 +54,23 @@ def authenticate(api_key, api_secret):
     auth = HTTPBasicAuth(api_key, api_secret)
     client = BackendApplicationClient(client_id=api_key)
     session = OAuth2Session(client=client)
-    session.fetch_token(token_url=api_url_base + "/token", auth=auth)
+    session.fetch_token(token_url=api_url_base + '/token', auth=auth)
     return session
 
 
 def bib_record_by_id(session, record_id):
     """Return a bib record for the given record number"""
-    r = session.get(api_url_base + "/bibs/{}".format((record_id)))
+    p = {'fields': 'default,fixedFields,varFields,normTitle,normAuthor,orders,'
+         'locations,available'}
+    r = session.get(api_url_base + '/bibs/{}'.format((record_id)), params=p)
     bib = BibRecord()
-    bib.api_data = json.loads(r.text)
-    bib.record_id = bib.api_data['id']
+    bib.load_api_data(json.loads(r.text))
     return bib
 
 
 def hold_record_by_id(session, hold_id):
     """Return the hold record for the given hold ID"""
-    r = session.get(api_url_base + "/patrons/holds/{}".format(str(hold_id)))
+    r = session.get(api_url_base + '/patrons/holds/{}'.format(str(hold_id)))
     h = HoldRecord()
     h.api_data = json.loads(r.text)
     h.hold_id = h.api_data['id'].split('/')[-1]
@@ -65,11 +88,11 @@ def hold_record_by_id(session, hold_id):
 def freeze_hold(session, hold_id):
     """Return a list of patron record numbers expiring on the given date"""
     query = {
-        "freeze": True
+        'freeze': True
     }
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
-    r = session.put(api_url_base + "/patrons/holds/{}".format(str(hold_id)),
+    r = session.put(api_url_base + '/patrons/holds/{}'.format(str(hold_id)),
                     data=data, headers=headers)
     return r
 
@@ -77,39 +100,35 @@ def freeze_hold(session, hold_id):
 def unfreeze_hold(session, hold_id):
     """Return a list of patron record numbers expiring on the given date"""
     query = {
-        "freeze": False
+        'freeze': False
     }
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
-    r = session.put(api_url_base + "/patrons/holds/{}".format(str(hold_id)),
+    r = session.put(api_url_base + '/patrons/holds/{}'.format(str(hold_id)),
                     data=data, headers=headers)
     return r
 
 
-def patron_record_by_id(session, patron_id):
+def patron_record_by_id(session, record_id):
     """Return the patron record for the given patron ID"""
-    r = session.get(api_url_base + "/patrons/{}".format(str(patron_id)))
+    r = session.get(api_url_base + '/patrons/{}'.format(str(record_id)))
     p = PatronRecord()
-    p.api_data = json.loads(r.text)
-    p.patron_id = p.api_data['id']
-    p.birth_date = datetime.strptime(p.api_data['birthDate'],
-                                     '%Y-%m-%d').date()
+    p.load_api_data(json.loads(r.text))
     return p
 
 
 def patron_record_by_barcode(session, barcode):
     """Return the record number(s) for the given barcode number"""
-    r = session.get(api_url_base + "/patrons/find?barcode=" + str(barcode))
+    r = session.get(api_url_base + '/patrons/find?barcode={}'.format(
+        str(barcode)), params=patron_api_fields)
     p = PatronRecord()
-    p.api_data = json.loads(r.text)
-    p.patron_id = p.api_data['id']
-    p.birthdate = datetime.strptime(p.api_data['birthDate'], '%Y-%m-%d')
+    p.load_api_data(json.loads(r.text))
     return p
 
 
-def patron_holds(session, patron_id):
+def patron_holds(session, record_id):
     """Return a list of hold IDs for the given patron"""
-    r = session.get("{}/patrons/{}/holds".format(api_url_base, patron_id))
+    r = session.get('{}/patrons/{}/holds'.format(api_url_base, record_id))
     entries = json.loads(r.text)['entries']
     ids = [x['id'].split('/')[-1] for x in entries]
     holds = []
@@ -121,23 +140,23 @@ def patron_holds(session, patron_id):
 def patrons_expiring_on_date(session, date):
     """Return a list of patron record numbers expiring on the given date"""
     query = {
-        "target": {
-            "record": {
-                "type": "patron"
+        'target': {
+            'record': {
+                'type': 'patron'
             },
-            "id": 43
+            'id': 43
         },
-        "expr": {
-            "op": "equals",
-            "operands": [
+        'expr': {
+            'op': 'equals',
+            'operands': [
                 # dates go in to queries as MM-DD-YY,
                 # but come out in ISO-8601 (YYYY-MM-DD)
-                date.strftime("%m/%d/%Y"),
-                ""
+                date.strftime('%m/%d/%Y'),
+                ''
             ]
         }
     }
-    url = "/patrons/query?offset=0&limit=" + str(api_limit)
+    url = '/patrons/query?offset=0&limit=' + str(api_limit)
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
     r = session.post(api_url_base + url, data=data, headers=headers)
@@ -154,44 +173,44 @@ def patrons_with_frozen_holds_expiring_on_date(session, date):
     """
 
     query = {
-        "queries": [
+        'queries': [
             {
-                "target": {
-                    "record": {
-                        "type": "patron"
+                'target': {
+                    'record': {
+                        'type': 'patron'
                     },
-                    "id": 80807
+                    'id': 80807
                 },
-                "expr": {
-                    "op": "equals",
-                    "operands": [
+                'expr': {
+                    'op': 'equals',
+                    'operands': [
                         # dates go in to queries as MM-DD-YY,
                         # but come out in ISO-8601 (YYYY-MM-DD)
-                        date.strftime("%m/%d/%Y"),
-                        ""
+                        date.strftime('%m/%d/%Y'),
+                        ''
                     ]
                 }
             },
-            "and",
+            'and',
             {
-                "target": {
-                    "record": {
-                        "type": "patron"
+                'target': {
+                    'record': {
+                        'type': 'patron'
                     },
-                    "id": 80804
+                    'id': 80804
                 },
-                "expr": {
-                    "op": "equals",
-                    "operands": [
-                        "true",
-                        ""
+                'expr': {
+                    'op': 'equals',
+                    'operands': [
+                        'true',
+                        ''
                     ]
                 }
             }
         ]
     }
 
-    url = "/patrons/query?offset=0&limit=" + str(api_limit)
+    url = '/patrons/query?offset=0&limit=' + str(api_limit)
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
     r = session.post(api_url_base + url, data=data, headers=headers)
@@ -199,13 +218,13 @@ def patrons_with_frozen_holds_expiring_on_date(session, date):
 
     # Now we have a list of patron IDs, where each patron has at least one
     # frozen hold expiring on the specified date.
-    patron_ids = [x['link'].split('/')[-1] for x in entries]
+    record_ids = [x['link'].split('/')[-1] for x in entries]
 
     patrons = []
-    for patron_id in patron_ids:
-        patron = patron_record_by_id(session, patron_id)
+    for record_id in record_ids:
+        patron = patron_record_by_id(session, record_id)
         patron.holds = []
-        holds = patron_holds(session, patron_id)
+        holds = patron_holds(session, record_id)
         for hold_id in holds:
             hold = hold_record_by_id(session, hold_id)
 
@@ -223,25 +242,38 @@ def patrons_in_zipcode(session, zipcode):
     """Get patrons in the specified zip code"""
 
     query = {
-        "target": {
-            "record": {
-                "type": "patron"
+        'target': {
+            'record': {
+                'type': 'patron'
             },
-            "id": 80010
+            'id': 80010
         },
-        "expr": {
-            "op": "equals",
-            "operands": [
+        'expr': {
+            'op': 'equals',
+            'operands': [
                 str(zipcode),
-                ""
+                ''
             ]
         }
     }
 
-    url = "/patrons/query?offset=0&limit={}".format(str(api_limit))
+    url = '/patrons/query?offset=0&limit={}'.format(str(api_limit))
     headers = {'content-type': 'application/json'}
     data = json.dumps(query)
     r = session.post(api_url_base + url, data=data, headers=headers)
     entries = json.loads(r.text)['entries']
-    patron_ids = [x['link'].split('/')[-1] for x in entries]
-    return patron_ids
+    record_ids = [x['link'].split('/')[-1] for x in entries]
+    return record_ids
+
+
+def isbns_from_api_data(api_data):
+    isbns = [[y['content'] for y in x['subfields'] if y['tag'] == 'a']
+             for x in api_data['varFields'] if x['fieldTag'] == 'i']
+    return [s[0].split()[0] for s in isbns]
+
+
+def jacket_url_from_isbns(isbns):
+    isbn = isbns[0]  # TODO: get "best" ISBN for jacket image
+    return ('http://imagesa.btol.com/ContentCafe/Jacket.aspx'
+            '?UserID=ContentCafeClient&Password=Client'
+            '&Return=T&Type=L&Value={}'.format(str(isbn)))
