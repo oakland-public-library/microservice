@@ -12,7 +12,10 @@ api_limit = 1000
 # sensitive patron information.
 patron_api_fields = {'fields': 'default,fixedFields'}
 
+# Friendly names for record types
 record_types = {'i': 'Item', 'b': 'Bibliographic', 'v': 'Volume'}
+
+# URL paths for record types
 hold_type_paths = {'i': 'item', 'b': 'bib', 'v': 'vol'}
 
 
