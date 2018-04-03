@@ -6,10 +6,10 @@ import ils_report
 from flask import Flask
 from flask import render_template
 from flask import request
-import datetime
+from flask import redirect
 import configparser
-from pprint import pprint
 import json
+from pprint import pprint
 
 app = Flask(__name__)
 
@@ -24,6 +24,17 @@ DNA_HOST = config['sierra_dna_client']['host']
 DNA_DB = config['sierra_dna_client']['db']
 DNA_USER = config['sierra_dna_client']['user']
 DNA_PASS = config['sierra_dna_client']['pass']
+
+
+@app.route('/')
+def root():
+    return render_template('index.html')
+
+
+@app.route('/find')
+def find():
+    return redirect('/{}/{}'.format(request.args.get('record_type'),
+                                    request.args.get('record_id')))
 
 
 @app.route('/test_bib')
@@ -62,17 +73,25 @@ def patron_bc(barcode):
     record = api.patron_record_by_barcode(session, barcode)
     holds = api.patron_holds(session, record.record_id)
     return render_template('patron_record.html', record=record, holds=holds,
-                           barcode=barcode)
+                           debug=True)
 
 
-@app.route('/hold/<record_id>')
+@app.route('/hold/<record_id>', methods=['GET', 'POST'])
 def hold(record_id):
     session = api.authenticate(API_KEY, API_SECRET)
+    if request.method == 'POST':
+        if request.form.get('freeze'):
+            api.freeze_hold(session, record_id)
+        if request.form.get('unfreeze'):
+            api.unfreeze_hold(session, record_id)
     record = api.hold_record_by_id(session, record_id)
-    return render_template('hold_record.html', record=record, debug=True)
+    actions = [{'name': 'freeze', 'value': 'Freeze Hold'},
+               {'name': 'unfreeze', 'value': 'Unfreeze Hold'}]
+    return render_template('hold_record.html', record=record, actions=actions,
+                           debug=True)
 
 
-@app.route('/report')
+@app.route('/report/hdh')
 def report():
     ratio = request.args.get('ratio', default=4)
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
@@ -80,4 +99,4 @@ def report():
     return render_template('hdh_report.html', report=report)
 
 
-app.run()
+app.run(host='0.0.0.0')

@@ -1,10 +1,10 @@
 <!doctype html>
 <head>
   <title>Hold Record</title>
-  <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
-  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+  {% include 'header_common.html' %}
 </head>
 <body>
+  {% include 'page_header.html' %}
   {% if record %}
   <div class="record">
     <div class="record_info">
@@ -20,17 +20,20 @@
       </table>
     </div>
   </div>
-  {% if debug %}
-  <div class="api_data">
-    <h2><i class="fas fa-bug"></i> API Data</h2>
-    <table>
-      {% for x in record.api_data %}
-      <tr><td>{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+  <div class="actions">
+    <form action="" method="post">
+      {% for x in actions %}
+      <div class="action-item">
+        <input type="submit" name="{{ x.name }}" value="{{ x.value }}" />
+      </div>
       {% endfor %}
-    </table>
+    </form>
   </div>
+  {% if debug %}
+  {% include 'api_data.html' %}
   {% endif %}
   {% else %}
   <h2>no data</h2>
   {% endif %}
+  {% include 'page_footer.html' %}
 </body>

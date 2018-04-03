@@ -1,0 +1,28 @@
+<!doctype html>
+<head>
+  <title>DNA/API Tool</title>
+  {% include 'header_common.html' %}
+</head>
+<body>
+  {% include 'page_header.html' %}
+  <h1>Sierra DNA/API Tool &nbsp;<i class="fas fa-user-secret"></i></h1>
+  <div class="record">
+    <h2>Records</h2>
+    <form action="/find" method="get">
+      <select name="record_type"> <!--Supplement an id here instead of using 'text'-->
+        <option value="patron" selected>Patron Record</option> 
+        <option value="patron/barcode">Patron Barcode</option>
+        <option value="bib">Bib Record</option>
+        <option value="item">Item Record</option>
+        <option value="hold">Hold Record</option>
+      </select>
+      <input id="record_id" type="text" name="record_id" size="12">
+      <input type="submit" value="Go fetch!">
+    </form>
+    <h2>Reports</h2>
+    <ul>
+      <li><a href="/report/hdh">High Demand Holds</a></li>
+    </ul>
+  </div>
+  {% include 'page_footer.html' %}
+</body>

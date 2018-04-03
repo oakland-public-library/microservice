@@ -10,7 +10,15 @@ api_limit = 1000
 
 # Which fields to retrieve for patron records. Certain fields may have
 # sensitive patron information.
-patron_api_fields = {'fields': 'default,fixedFields'}
+patron_api_fields = {'fields': 'default,fixedFields,barcodes'}
+
+# Which fields to retrieve for bibliographic records.
+bib_record_fields = {'fields': 'default,fixedFields,varFields,normTitle,'
+                     'normAuthor,orders,locations,available'}
+
+# Which fields to retrieve for item records.
+item_record_fields = {'fields': 'default,fixedFields,varFields,barcode,'
+                      'callNumber,status,itemType,bibIds'}
 
 # Friendly names for record types
 record_types = {'i': 'Item', 'b': 'Bibliographic', 'v': 'Volume'}
@@ -23,7 +31,9 @@ class PatronRecord:
     def __init__(self, api_data=None):
         self.api_data = api_data
         self.record_id = api_data['id']
+        self.patron_type = api_data['patronType']
         self.birthdate = datetime.strptime(api_data['birthDate'], '%Y-%m-%d')
+        self.barcodes = api_data['barcodes']
 
 
 class BibRecord:
@@ -86,18 +96,16 @@ def authenticate(api_key, api_secret):
 
 def bib_record_by_id(session, record_id):
     """Return a bib record for the given record number"""
-    p = {'fields': 'default,fixedFields,varFields,normTitle,normAuthor,orders,'
-         'locations,available'}
-    d = session.get(api_url_base + '/bibs/{}'.format((record_id)), params=p)
+    d = session.get(api_url_base + '/bibs/{}'.format((record_id)),
+                    params=bib_record_fields)
     r = BibRecord(api_data=json.loads(d.text))
     return r
 
 
 def item_record_by_id(session, record_id):
     """Return a item record for the given record number"""
-    p = {'fields': 'default,fixedFields,varFields,barcode,callNumber,status,'
-         'itemType,bibIds'}
-    d = session.get(api_url_base + '/items/{}'.format((record_id)), params=p)
+    d = session.get(api_url_base + '/items/{}'.format((record_id)),
+                    params=item_record_fields)
     r = ItemRecord(api_data=json.loads(d.text))
     return r
 
@@ -135,7 +143,8 @@ def unfreeze_hold(session, hold_id):
 
 def patron_record_by_id(session, record_id):
     """Return the patron record for the given patron ID"""
-    r = session.get(api_url_base + '/patrons/{}'.format(str(record_id)))
+    r = session.get(api_url_base + '/patrons/{}'.format(str(record_id)),
+                    params=patron_api_fields)
     p = PatronRecord(api_data=json.loads(r.text))
     return p
 

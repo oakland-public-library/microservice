@@ -1,0 +1,8 @@
+<div class="api_data">
+  <h2><i class="fas fa-bug"></i> API Data</h2>
+  <table>
+    {% for x in record.api_data %}
+    <tr><td class="field_name">{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
