@@ -24,20 +24,36 @@ tr:nth-child(even) { background: #ddd }
 tr:nth-child(odd) { background: #fff }
 
 .field_name {
+  vertical-align: top;
   font-weight: bold;
 }
 
-.record_info {
-  float: left;
+.record {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 16px;
+  margin-bottom: 12px;
 }
 
-.api_data {
-  float: left;
+.bib_wrapper {
+  display: flex;
+}
+
+.item_wrapper {
+  display: flex;
+}
+
+.record_info {
 }
 
 .jacket {
-  float: left;
   padding: 3px;
+}
+
+.api_data {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 16px;
 }
 
 .jacket img {
@@ -46,4 +62,9 @@ tr:nth-child(odd) { background: #fff }
   padding: 3px;
   margin-left: 12px;
   height: 300px;
+}
+
+#barcode {
+  margin-left: 4px;
+  vertical-align: top;
 }

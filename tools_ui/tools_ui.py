@@ -26,23 +26,50 @@ DNA_USER = config['sierra_dna_client']['user']
 DNA_PASS = config['sierra_dna_client']['pass']
 
 
-@app.route('/bib/<record_id>')
-def bib(record_id):
-    if record_id == 'test':
-        record = api.BibRecord(api_data=json.load(open('bib.json')))
-    else:
-        session = api.authenticate(API_KEY, API_SECRET)
-        record = api.bib_record_by_id(session, record_id.lstrip('b'))
+@app.route('/test_bib')
+def test_bib():
+    record = api.BibRecord(api_data=json.load(open('test_bib.json')))
     return render_template('bib_record.html', record=record)
 
 
-@app.route('/patron/<barcode>')
-def patron(barcode):
+@app.route('/bib/<record_id>')
+def bib(record_id):
+    session = api.authenticate(API_KEY, API_SECRET)
+    record_id = record_id.lstrip('b')
+    record = api.bib_record_by_id(session, record_id)
+    return render_template('bib_record.html', record=record, debug=True)
+
+
+@app.route('/item/<record_id>')
+def item(record_id):
+    session = api.authenticate(API_KEY, API_SECRET)
+    record = api.item_record_by_id(session, record_id)
+    return render_template('item_record.html', record=record, debug=True)
+
+
+@app.route('/patron/<record_id>')
+def patron_id(record_id):
+    session = api.authenticate(API_KEY, API_SECRET)
+    record = api.patron_record_by_id(session, record_id)
+    holds = api.patron_holds(session, record.record_id)
+    return render_template('patron_record.html', record=record, holds=holds,
+                           debug=True)
+
+
+@app.route('/patron/barcode/<barcode>')
+def patron_bc(barcode):
     session = api.authenticate(API_KEY, API_SECRET)
     record = api.patron_record_by_barcode(session, barcode)
     holds = api.patron_holds(session, record.record_id)
     return render_template('patron_record.html', record=record, holds=holds,
                            barcode=barcode)
+
+
+@app.route('/hold/<record_id>')
+def hold(record_id):
+    session = api.authenticate(API_KEY, API_SECRET)
+    record = api.hold_record_by_id(session, record_id)
+    return render_template('hold_record.html', record=record, debug=True)
 
 
 @app.route('/report')

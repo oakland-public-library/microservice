@@ -2,29 +2,35 @@
 <head>
   <title>Patron Record</title>
   <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
 </head>
 <body>
   {% if record %}
-  <h2>Patron Record {{ record.record_id }}{% if barcode %} (Barcode {{ barcode }}){% endif %}</h2>
-  <div class="record_info">
-    <h3>Hold Records</h3>
+  <div class="record">
+    <div class="record_info">
+      <h2><i class="fas fa-user-circle"></i> Patron Record {{ record.record_id }}{% if barcode %} (Barcode {{ barcode }}){% endif %}</h2>
+      <table>
+        <tr><td class="field_name">Expiration Date</td><td></td></tr>
+      </table>
+    </div>
+    <h3><i class="fas fa-tag"></i> Patron Holds</h2>
     <table>
       <tr><th>Hold ID</th><th>Frozen</th></tr>
       {% for hold in holds %}
-      <tr><td>{{ hold.hold_id }}</td><td>{{ hold.frozen }}</td></tr>
+      <tr><td><a href="/hold/{{hold}}">{{ hold }}</a></td><td>{{ hold.frozen }}</td></tr>
       {% endfor %}
     </table>
-    {% if debug %}
-    <div class="api_data">
-      <hr />
-      <table>
-        {% for x in record.api_data %}
-        <tr><td class="field_name">{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
-        {% endfor %}
-      </table>
-    </div>
-    {% endif %}
   </div>
+  {% if debug %}
+  <div class="api_data">
+    <h2><i class="fas fa-bug"></i> API Data</h2>
+    <table>
+      {% for x in record.api_data %}
+      <tr><td class="field_name">{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
   {% else %}
   <h2>no data</h2>
   {% endif %}

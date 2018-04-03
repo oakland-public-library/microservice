@@ -1,0 +1,36 @@
+<!doctype html>
+<head>
+  <title>Hold Record</title>
+  <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+</head>
+<body>
+  {% if record %}
+  <div class="record">
+    <div class="record_info">
+      <h2><i class="fas fa-tag"></i> Hold Record {{ record.record_id }}</h2>
+      <table>
+        <tr><td class="field_name">Target Record ID</td><td><a href="/{{ record.hold_type_path }}/{{ record.target_record_id }}">{{ record.target_record_id }}</a></td></tr>
+        <tr><td class="field_name">Target Record Type</td><td>{{ record.target_record_type_code }} ({{ record.target_record_type }})</td></tr>
+        <tr><td class="field_name">Patron Record</td><td><a href="/patron/{{ record.patron_record_id }}">{{ record.patron_record_id }}</a></td></tr>
+        <tr><td class="field_name">Frozen</td><td>{{ record.frozen }}</td></tr>
+        <tr><td class="field_name">Placed</td><td>{{ record.placed }}</td></tr>
+        <tr><td class="field_name">Not Before</td><td>{{ record.not_wanted_before }}</td></tr>
+        <tr><td class="field_name">Not After</td><td>{{ record.not_wanted_after }}</td></tr>
+      </table>
+    </div>
+  </div>
+  {% if debug %}
+  <div class="api_data">
+    <h2><i class="fas fa-bug"></i> API Data</h2>
+    <table>
+      {% for x in record.api_data %}
+      <tr><td>{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+  {% else %}
+  <h2>no data</h2>
+  {% endif %}
+</body>

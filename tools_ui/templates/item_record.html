@@ -1,0 +1,46 @@
+<!doctype html>
+<head>
+  <title>Item Record</title>
+  <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+  <script src="/static/JsBarcode.codabar.min.js"></script>
+</head>
+<body>
+  {% if record %}
+  <div class="record">
+    <div class="record_info">        
+      <h2><i class="fas fa-book"></i> Item Record {{ record.record_id }}</h2>
+      <table>
+        <tr><td class="field_name">Call Number</td><td>{{ record.call }}</td></tr>
+        <tr><td class="field_name">Status</td><td>{{ record.status_code }} ({{ record.status }})</td></tr>
+        <tr><td class="field_name">Item Type</td><td>{{ record.item_type }}</td></tr>
+        <tr><td class="field_name">Bib Record</td><td><a href="/bib/{{ record.bib_record }}">{{ record.bib_record }}</a></td></tr>
+        <tr><td class="field_name">Barcode</td><td>{{ record.barcode }}
+          <svg id="barcode"</svg>
+          <script>
+           JsBarcode("#barcode", "{{ record.barcode }}", {
+             format: "codabar",
+             width: 1,
+             height: 30,
+             margin: 0,
+             displayValue: false
+           });
+          </script>
+        </td></tr>
+      </table>
+    </div>
+  </div>
+  {% if debug %}
+  <div class="api_data">
+    <h2><i class="fas fa-bug"></i> API Data</h2>
+    <table>
+      {% for x in record.api_data %}
+      <tr><td>{{ x }}</td><td>{{ record.api_data[x] }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+  {% else %}
+  <h2>no data</h2>
+  {% endif %}
+</body>

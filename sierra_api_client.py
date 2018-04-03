@@ -8,7 +8,12 @@ api_url_base = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4"
 api_token_url = "https://catalog.oaklandlibrary.org/iii/sierra-api/v4/token"
 api_limit = 1000
 
+# Which fields to retrieve for patron records. Certain fields may have
+# sensitive patron information.
 patron_api_fields = {'fields': 'default,fixedFields'}
+
+record_types = {'i': 'Item', 'b': 'Bibliographic', 'v': 'Volume'}
+hold_type_paths = {'i': 'item', 'b': 'bib', 'v': 'vol'}
 
 
 class PatronRecord:
@@ -22,12 +27,12 @@ class BibRecord:
     def __init__(self, api_data=None):
         self.api_data = api_data
         self.record_id = api_data['id']
-        self.catalog_date = api_data.get('catalogDate', '-')
+        self.catalog_date = api_data.get('catalogDate', None)
         self.title = api_data['title'].title()
-        self.author = api_data['author']
+        self.author = api_data.get('author', None)
         self.material_type = api_data['materialType']['value']
         self.material_type_code = api_data['materialType']['code']
-        self.publish_year = api_data.get('publishYear', '-')
+        self.publish_year = api_data.get('publishYear', None)
         self.available = api_data['available']
         self.isbns = isbns_from_api_data(api_data)
         self.jacket_url = jacket_url_from_isbns(self.isbns)
@@ -35,11 +40,37 @@ class BibRecord:
         # bib.publisher = d[]
 
 
+class ItemRecord:
+    def __init__(self, api_data=None):
+        self.api_data = api_data
+        self.record_id = api_data['id']
+        self.barcode = api_data['barcode']
+        self.call = api_data['callNumber']
+        self.status = api_data['status']['display']
+        self.status_code = api_data['status']['code']
+        self.item_type = api_data['itemType']
+        self.bib_record = api_data['bibIds'][0]
+
+
 class HoldRecord:
-    def __init__(self):
-        self.api_data = None
-        self.hold_id = None
-        self.frozen = None
+    def __init__(self, api_data=None):
+        self.api_data = api_data
+        self.record_id = api_data['id'].split('/')[-1]
+        self.target_record_id = api_data['record'].split('/')[-1]
+        self.target_record_type = record_types[api_data['recordType']]
+        self.target_record_type_code = api_data['recordType']
+        self.patron_record_id = api_data['patron'].split('/')[-1]
+        self.frozen = api_data['frozen']
+        d = api_data.get('placed', None)
+        self.placed = \
+            datetime.strptime(d, '%Y-%m-%d').date() if d else None
+        d = api_data.get('notWantedBeforeDate', None)
+        self.not_wanted_before = \
+            datetime.strptime(d, '%Y-%m-%d').date() if d else None
+        d = api_data.get('notNeededAfterDate', None)
+        self.not_wanted_after = \
+            datetime.strptime(d, '%Y-%m-%d').date() if d else None
+        self.hold_type_path = hold_type_paths[self.target_record_type_code]
 
 
 def authenticate(api_key, api_secret):
@@ -54,26 +85,25 @@ def bib_record_by_id(session, record_id):
     """Return a bib record for the given record number"""
     p = {'fields': 'default,fixedFields,varFields,normTitle,normAuthor,orders,'
          'locations,available'}
-    r = session.get(api_url_base + '/bibs/{}'.format((record_id)), params=p)
-    bib = BibRecord(api_data=json.loads(r.text))
-    return bib
+    d = session.get(api_url_base + '/bibs/{}'.format((record_id)), params=p)
+    r = BibRecord(api_data=json.loads(d.text))
+    return r
+
+
+def item_record_by_id(session, record_id):
+    """Return a item record for the given record number"""
+    p = {'fields': 'default,fixedFields,varFields,barcode,callNumber,status,'
+         'itemType,bibIds'}
+    d = session.get(api_url_base + '/items/{}'.format((record_id)), params=p)
+    r = ItemRecord(api_data=json.loads(d.text))
+    return r
 
 
 def hold_record_by_id(session, hold_id):
     """Return the hold record for the given hold ID"""
-    r = session.get(api_url_base + '/patrons/holds/{}'.format(str(hold_id)))
-    h = HoldRecord()
-    h.api_data = json.loads(r.text)
-    h.hold_id = h.api_data['id'].split('/')[-1]
-    h.record_type = h.api_data['recordType']
-    h.frozen = h.api_data['frozen']
-
-    if 'notNeededAfterDate' in h.api_data:
-        h.expiration_date = datetime.strptime(h.api_data['notNeededAfterDate'],
-                                              '%Y-%m-%d').date()
-    else:
-        h.expiration_date = None
-    return h
+    d = session.get(api_url_base + '/patrons/holds/{}'.format(str(hold_id)))
+    r = HoldRecord(api_data=json.loads(d.text))
+    return r
 
 
 def freeze_hold(session, hold_id):
@@ -120,10 +150,10 @@ def patron_holds(session, record_id):
     r = session.get('{}/patrons/{}/holds'.format(api_url_base, record_id))
     entries = json.loads(r.text)['entries']
     ids = [x['id'].split('/')[-1] for x in entries]
-    holds = []
+    hold_ids = []
     for i in ids:
-        holds.append(hold_record_by_id(session, i))
-    return holds
+        hold_ids.append(i)
+    return hold_ids
 
 
 def patrons_expiring_on_date(session, date):
