@@ -4,7 +4,7 @@ def make_hdh(conn, ratio):
     sql = """
     SELECT
   bibrecord,
-  left(bibtitle, 80) as title,
+  bibtitle,
   holdcount,
   itemcount,
   coalesce(order_copies_count,0) as ordercopycount
