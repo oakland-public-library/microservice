@@ -49,16 +49,17 @@ class BibRecord:
         self.available = api_data['available']
         self.isbns = isbns_from_api_data(api_data)
         self.jacket_url = jacket_url_from_isbns(self.isbns)
-        # bib.call = d[]
-        # bib.publisher = d[]
+        self.bib_call = bib_call_num(api_data)
+        self.pub_info = pub_info(api_data)
 
 
 class ItemRecord:
     def __init__(self, api_data=None):
         self.api_data = api_data
         self.record_id = api_data['id']
-        self.barcode = api_data['barcode']
-        self.call = api_data['callNumber']
+        self.barcode = api_data['barcode'] if 'barcode' in api_data else None
+        self.call = \
+            api_data['callNumber'] if 'callNumber' in api_data else None
         self.status = api_data['status']['display']
         self.status_code = api_data['status']['code']
         self.item_type = api_data['itemType']
@@ -304,15 +305,23 @@ def isbns_from_api_data(api_data):
 
 
 def jacket_url_from_isbns(isbns):
-    isbn = isbns[0]  # TODO: get "best" ISBN for jacket image
+    # TODO: get "best" ISBN for jacket image
+    isbn = isbns[0] if isbns else None
     return ('http://imagesa.btol.com/ContentCafe/Jacket.aspx'
             '?UserID=ContentCafeClient&Password=Client'
             '&Return=T&Type=L&Value={}'.format(str(isbn)))
 
 
 def bib_call_num(api_data):
-    # get first a-tagged call number from c index in varfields
-    call_num = [[y['content'] for y in x['subfields'] if y['tag'] == 'a'] for x in api_data['varFields'] if
-                x['fieldTag'] == 'c']
+    """get first a-tagged call number from c index in varfields"""
+    call_num = [[y['content'] for y in x['subfields'] if y['tag'] == 'a']
+                for x in api_data['varFields'] if x['fieldTag'] == 'c']
     call_num = [x for sc in call_num for x in sc]
     return call_num[0]
+
+
+def pub_info(api_data):
+    pub_data = [[y['content'] for y in x['subfields']]
+                for x in api_data['varFields'] if x['fieldTag'] == 'p']
+    pub_data = ' '.join([x for sc in pub_data for x in sc])
+    return pub_data
