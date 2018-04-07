@@ -13,11 +13,13 @@
         <table>
           <tr><td class="field_name">Title</td><td>{{ record.title }}</td></tr>
           <tr><td class="field_name">Author</td><td>{{ record.author }}</td></tr>
+          <tr><td class="field_name">Call Number</td><td>{{ record.bib_call }}</td></tr>
           <tr><td class="field_name">Material Type</td><td>{{ record.material_type }}</td></tr>
           <tr><td class="field_name">Published</td><td>{{ record.publish_year }}</td></tr>
           <tr><td class="field_name">Available</td><td>{{ record.available }}</td></tr>
           <tr><td class="field_name">ISBNs</td><td>{% for x in record.isbns %}{{ x }}<br />{% endfor %}</td></tr>
           <tr><td class="field_name">Catalog Date</td><td>{{ record.catalog_date }}</td></tr>
+          <tr><td class="field_name">Publication Info</td><td>{{ record.pub_info }}</td></tr>
         </table>
       </div>
       <div class="jacket">
