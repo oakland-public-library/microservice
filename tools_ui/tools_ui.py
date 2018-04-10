@@ -25,6 +25,8 @@ DNA_DB = config['sierra_dna_client']['db']
 DNA_USER = config['sierra_dna_client']['user']
 DNA_PASS = config['sierra_dna_client']['pass']
 
+MAPBOX_TOKEN = config['branch_map']['mapbox_token']
+
 
 @app.route('/')
 def root():
@@ -97,6 +99,15 @@ def report():
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
     report = ils_report.make_hdh(conn, ratio)
     return render_template('hdh_report.html', report=report)
+
+
+@app.route('/map/test')
+def map_test():
+    with open('static/branches.json') as f:
+        branches = json.load(f)
+    return render_template('branch_map.html', mapbox_token=MAPBOX_TOKEN,
+                           default_view=[37.794, -122.234],
+                           branches=branches)
 
 
 app.run(host='0.0.0.0')

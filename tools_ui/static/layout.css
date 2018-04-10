@@ -93,3 +93,5 @@ tr:nth-child(odd) { background: #fff }
 .action-item {
   display: inline;
 }
+
+#branch_map { height: 480px; }
