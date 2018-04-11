@@ -317,7 +317,7 @@ def bib_call_num(api_data):
     call_num = [[y['content'] for y in x['subfields'] if y['tag'] == 'a']
                 for x in api_data['varFields'] if x['fieldTag'] == 'c']
     call_num = [x for sc in call_num for x in sc]
-    return call_num[0]
+    return call_num[0] if len(call_num) else None
 
 
 def pub_info(api_data):
