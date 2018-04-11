@@ -8,3 +8,6 @@ host =
 db =
 user =
 pass =
+
+[branch_map]
+mapbox_token = pk.xxx
