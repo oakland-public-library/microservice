@@ -62,3 +62,41 @@ def new_titles(conn, since):
     r = cur.fetchall()
     cur.close()
     return [n[0] for n in r]
+
+
+def ptype_name(conn, ptype):
+    """Return the name for a given patron type ID"""
+    cur = conn.cursor()
+    cur.execute("select description from sierra_view.ptype_property_name " +
+                "where ptype_id = '{}' and iii_language_id = 1".format(ptype))
+    r = cur.fetchall()
+    cur.close()
+    return r[0][0]
+
+
+def branches(conn):
+    """Return address and geographical data for all branches"""
+    cur = conn.cursor()
+    cur.execute("select code_num,address,address_latitude,address_longitude " +
+                "from sierra_view.branch where address <> ''")
+    r = cur.fetchall()
+    cur.close()
+    return [{'code': s[0], 'name': s[1].split('$')[0],
+             'address': s[1].split('$')[1],
+             'city_zip': s[1].split('$')[2],
+             'phone': s[1].split('$')[3],
+             'lat': s[2], 'lon': s[3]} for s in r]
+
+
+def branch_by_id(conn, b):
+    """Return address and geographical data for a branch"""
+    cur = conn.cursor()
+    cur.execute("select code_num,address,address_latitude,address_longitude " +
+                "from sierra_view.branch where code_num = {}".format(b))
+    r = cur.fetchall()[0]
+    cur.close()
+    return {'code': r[0], 'name': r[1].split('$')[0],
+            'address': r[1].split('$')[1],
+            'city_zip': r[1].split('$')[2],
+            'phone': r[1].split('$')[3],
+            'latlon': [float(r[2]), float(r[3])]}

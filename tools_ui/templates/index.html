@@ -7,21 +7,33 @@
   {% include 'page_header.html' %}
   <h1>Sierra DNA/API Tool &nbsp;<i class="fas fa-user-secret"></i></h1>
   <div class="record">
-    <h2>Records</h2>
-    <form action="/find" method="get">
-      <select name="record_type"> <!--Supplement an id here instead of using 'text'-->
-        <option value="patron" selected>Patron Record</option> 
-        <option value="patron/barcode">Patron Barcode</option>
-        <option value="bib">Bib Record</option>
-        <option value="item">Item Record</option>
-        <option value="hold">Hold Record</option>
-      </select>
-      <input id="record_id" type="text" name="record_id" size="12">
-      <input type="submit" value="Go fetch!">
-    </form>
+    <div class="lookup">
+      <h2>Record Lookup</h2>
+      <ul>
+        <li><span>Patron Record<form action="/find" method="get" record_type="bib">
+          <input type="hidden" name="record_type" value="patron">
+          <input id="record_id" type="text" name="record_id" size="16"></form></span></li>
+        <li><span>Patron Barcode<form action="/find" method="get" record_type="bib">
+          <input type="hidden" name="record_type" value="patron/barcode">
+          <input id="record_id" type="text" name="record_id" size="16"></form></span></li>
+        <li><span>Bib Record <form action="/find" method="get" record_type="bib">
+          <input type="hidden" name="record_type" value="bib">
+          <input id="record_id" type="text" name="record_id" size="16"></form></span></li>
+        <li><span>Item Record <form action="/find" method="get" record_type="bib">
+          <input type="hidden" name="record_type" value="item">
+          <input id="record_id" type="text" name="record_id" size="16"></form></span></li>
+        <li><span>Hold Record <form action="/find" method="get" record_type="bib">
+          <input type="hidden" name="record_type" value="hold">
+          <input id="record_id" type="text" name="record_id" size="16"></form></span></li>
+      </ul>
+    </div>
     <h2>Reports</h2>
     <ul>
       <li><a href="/report/hdh">High Demand Holds</a></li>
+    </ul>
+    <h2>Maps</h2>
+    <ul>
+      <li><a href="/branch">Branch Locations</a></li>
     </ul>
   </div>
   {% include 'page_footer.html' %}

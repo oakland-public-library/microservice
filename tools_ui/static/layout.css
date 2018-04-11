@@ -45,6 +45,14 @@ tr:nth-child(odd) { background: #fff }
   margin-bottom: 12px;
 }
 
+.lookup form {
+  display: inline;
+}
+
+.lookup form input {
+  margin: 2px;
+}
+
 .bib_wrapper {
   display: flex;
 }
@@ -57,7 +65,7 @@ tr:nth-child(odd) { background: #fff }
 }
 
 .jacket {
-  padding: 3px;
+  padding: 18px;
 }
 
 .api_data {
@@ -94,4 +102,44 @@ tr:nth-child(odd) { background: #fff }
   display: inline;
 }
 
-#branch_map { height: 480px; }
+.branch_wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.branch_info {
+}
+
+.map {
+  padding: 3px;
+  margin-left: 12px;
+}
+
+.map_label {
+  font-family: 'plex', sans-serif;
+  padding: 0;
+  margin: 0;
+  font-size: 1.3em;
+}
+
+.map_label h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.3em;
+}
+
+.map_label p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.3em;
+}
+
+#branch_map {
+  width: 400px;
+  height: 300px;
+}
+
+#overview_map {
+  width: 720px;
+  height: 540px;
+}

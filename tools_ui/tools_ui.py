@@ -9,7 +9,7 @@ from flask import request
 from flask import redirect
 import configparser
 import json
-from pprint import pprint
+from operator import itemgetter
 
 app = Flask(__name__)
 
@@ -65,6 +65,8 @@ def patron_id(record_id):
     session = api.authenticate(API_KEY, API_SECRET)
     record = api.patron_record_by_id(session, record_id)
     holds = api.patron_holds(session, record.record_id)
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    record.patron_type_name = dna.ptype_name(conn, record.patron_type)
     return render_template('patron_record.html', record=record, holds=holds,
                            debug=True)
 
@@ -74,6 +76,8 @@ def patron_bc(barcode):
     session = api.authenticate(API_KEY, API_SECRET)
     record = api.patron_record_by_barcode(session, barcode)
     holds = api.patron_holds(session, record.record_id)
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    record.patron_type_name = dna.ptype_name(conn, record.patron_type)
     return render_template('patron_record.html', record=record, holds=holds,
                            debug=True)
 
@@ -101,13 +105,24 @@ def report():
     return render_template('hdh_report.html', report=report)
 
 
-@app.route('/map/test')
+@app.route('/branch')
 def map_test():
-    with open('static/branches.json') as f:
-        branches = json.load(f)
-    return render_template('branch_map.html', mapbox_token=MAPBOX_TOKEN,
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    branches = sorted(dna.branches(conn), key=itemgetter('name'))
+    return render_template('branch_overview.html', mapbox_token=MAPBOX_TOKEN,
                            default_view=[37.794, -122.234],
                            branches=branches)
+
+
+@app.route('/branch/<branch_id>')
+def branch(branch_id):
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    branches = dna.branches(conn)
+    branch = dna.branch_by_id(conn, branch_id)
+    return render_template('branch.html', branch=branch,
+                           mapbox_token=MAPBOX_TOKEN,
+                           default_view=branch['latlon'],
+                           branches=branches, debug=True)
 
 
 app.run(host='0.0.0.0')
