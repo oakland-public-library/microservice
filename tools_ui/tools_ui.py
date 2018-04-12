@@ -124,6 +124,7 @@ def branch(branch_id):
                            default_view=branch['latlon'],
                            branches=branches, debug=True)
 
+
 @app.route('/a/<gid>')
 def a(gid):
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
