@@ -124,5 +124,13 @@ def branch(branch_id):
                            default_view=branch['latlon'],
                            branches=branches, debug=True)
 
+@app.route('/a/<gid>')
+def a(gid):
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    x = dna.branch_id_by_stat_group(conn, gid)
+    r = {}
+    r['api_data'] = [{'branch_id': x}]
+    return render_template('patron_record.html', record=r, debug=True)
+
 
 app.run(host='0.0.0.0')

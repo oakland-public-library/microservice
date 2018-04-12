@@ -88,15 +88,24 @@ def branches(conn):
              'lat': s[2], 'lon': s[3]} for s in r]
 
 
-def branch_by_id(conn, b):
+def branch_by_id(conn, bid):
     """Return address and geographical data for a branch"""
     cur = conn.cursor()
     cur.execute("select code_num,address,address_latitude,address_longitude " +
-                "from sierra_view.branch where code_num = {}".format(b))
-    r = cur.fetchall()[0]
+                "from sierra_view.branch where code_num = {}".format(bid))
+    r = cur.fetchone()
     cur.close()
     return {'code': r[0], 'name': r[1].split('$')[0],
             'address': r[1].split('$')[1],
             'city_zip': r[1].split('$')[2],
             'phone': r[1].split('$')[3],
             'latlon': [float(r[2]), float(r[3])]}
+
+
+def branch_id_by_stat_group(conn, gid):
+    """Return branch ID for a statistical group code"""
+    cur = conn.cursor()
+    cur.execute("select lc.branch_code_num from sierra_view.statistic_group sg join sierra_view.location lc on sg.location_code = lc.code where sg.code_num = {}".format(gid))
+    r = cur.fetchone()
+    cur.close()
+    return r[0]
