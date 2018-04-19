@@ -10,6 +10,7 @@ from flask import redirect
 import configparser
 import json
 from operator import itemgetter
+import math
 
 app = Flask(__name__)
 
@@ -125,13 +126,58 @@ def branch(branch_id):
                            branches=branches, debug=True)
 
 
-@app.route('/a/<gid>')
-def a(gid):
+@app.route('/test/a/<gid>')
+def test_a(gid):
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
     x = dna.branch_id_by_stat_group(conn, gid)
     r = {}
     r['api_data'] = [{'branch_id': x}]
     return render_template('patron_record.html', record=r, debug=True)
+
+
+@app.route('/test/b')
+def test_b():
+    charts = []
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    c = circ_stats(conn, 'dm', 'i')
+    c.append(circ_stats(conn, 'dm', 'o')[1])
+    charts.append({'title': 'Circulation Transactions',
+                   'data': c})
+    conn.close()
+    return render_template('charts.html', charts=charts, debug=True)
+
+
+def circ_stats(conn, location, op_code):
+    cur = conn.cursor()
+    # with open('test_query.sql', 'r') as f:
+    #     s = f.read()
+    s = """
+    with data as (
+    select
+    date_trunc('day', transaction_gmt) as day,
+    item_location_code,
+    op_code as op,
+    count(1)
+    from sierra_view.circ_trans
+    where
+    op_code = '{}' and
+    item_location_code like '{}%'
+    group by 1,2,3)
+    select
+    day, sum(count) as count
+    from data
+    where count > 0
+    group by day
+    order by day asc;
+    """.format(op_code, location)
+    cur.execute(s)
+    d = cur.fetchall()
+    cur.close()
+    c = [
+        ['x'] + [x[0].strftime('%Y-%m-%dT%H:%M') for x in d],
+        ['transactions'] + [int(x[1]) for x in d]
+    ]
+    return c
 
 
 app.run(host='0.0.0.0')

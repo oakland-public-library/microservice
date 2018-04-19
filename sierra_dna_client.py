@@ -105,7 +105,9 @@ def branch_by_id(conn, bid):
 def branch_id_by_stat_group(conn, gid):
     """Return branch ID for a statistical group code"""
     cur = conn.cursor()
-    cur.execute("select lc.branch_code_num from sierra_view.statistic_group sg join sierra_view.location lc on sg.location_code = lc.code where sg.code_num = {}".format(gid))
+    cur.execute("select lc.branch_code_num from sierra_view.statistic_group " +
+                "sg join sierra_view.location lc on sg.location_code = " +
+                "lc.code where sg.code_num = {}".format(gid))
     r = cur.fetchone()
     cur.close()
     return r[0]
