@@ -12,3 +12,4 @@ Test application:
 
 - flask
 - pytz
+- xlsxwriter
