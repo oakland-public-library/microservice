@@ -7,9 +7,11 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import redirect
+from flask import send_file
 import configparser
 import json
 from operator import itemgetter
+from datetime import datetime
 import math
 
 app = Flask(__name__)
@@ -101,9 +103,23 @@ def hold(record_id):
 @app.route('/report/hdh')
 def report():
     ratio = request.args.get('ratio', default=4)
+    output = request.args.get('output', default='html')
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
     report = ils_report.make_hdh(conn, ratio)
-    return render_template('hdh_report.html', report=report)
+    if output == 'xls':
+        file = ils_report.create_excel(report)
+        file.seek(0)
+        return send_file(file, as_attachment=True,
+                         attachment_filename='high_demand_holds_{}.xlsx'.
+                         format(datetime.strftime(datetime.now(), '%m-%d-%Y')))
+    elif output == 'csv':
+        file = ils_report.create_csv(report)
+        file.seek(0)
+        return send_file(file, as_attachment=True,
+                         attachment_filename='high_demand_holds_{}.csv'.
+                         format(datetime.strftime(datetime.now(), '%m-%d-%Y')))
+    else:
+        return render_template('hdh_report.html', report=report)
 
 
 @app.route('/branch')
