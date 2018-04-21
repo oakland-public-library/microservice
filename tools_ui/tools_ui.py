@@ -12,7 +12,6 @@ import configparser
 import json
 from operator import itemgetter
 from datetime import datetime
-import math
 
 app = Flask(__name__)
 
