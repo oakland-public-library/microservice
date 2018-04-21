@@ -141,16 +141,7 @@ def branch(branch_id):
                            branches=branches, debug=True)
 
 
-@app.route('/test/a/<gid>')
-def test_a(gid):
-    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
-    x = dna.branch_id_by_stat_group(conn, gid)
-    r = {}
-    r['api_data'] = [{'branch_id': x}]
-    return render_template('patron_record.html', record=r, debug=True)
-
-
-@app.route('/test/b')
+@app.route('/chart/test')
 def test_b():
     charts = []
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
