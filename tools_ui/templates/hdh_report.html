@@ -8,9 +8,10 @@
   <div class="record">
     <h2><i class="fas fa-chart-pie"></i> Report: High-demand Holds</h2>
     {% if report %}
+    <p>Generated at {{ report.date.strftime('%Y-%m-%d %H:%M') }}. Minimum hold-item ratio = {{ report.ratio }}.</p>
     <p>
       <i class="far fa-file-excel"></i> <a href="{{ request.path }}?{% for a in request.args %}{{ a }}={{ request.args.get(a) }}&{% endfor %}output=xls">Download as Excel</a> &nbsp;
-        <i class="far fa-file-excel"></i> <a href="{{ request.path }}?{% for a in request.args %}{{ a }}={{ request.args.get(a) }}&{% endfor %}output=csv">Download as CSV</a>
+      <i class="far fa-file-excel"></i> <a href="{{ request.path }}?{% for a in request.args %}{{ a }}={{ request.args.get(a) }}&{% endfor %}output=csv">Download as CSV</a>
     </p>
     <table>
       <tr>{% for cell in report.header %}<th>{{ cell.label }}</th>{% endfor %}</tr>
