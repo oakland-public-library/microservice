@@ -73,7 +73,8 @@ WHERE (holdcount::DECIMAL / COALESCE(NULLIF(itemcount,0),1))::DECIMAL >= (%s)"""
     report = {'header': header,
               'data': results,
               'description': 'High Demand Holds',
-              'date': datetime.datetime.now().isoformat()
+              'date': datetime.datetime.now().isoformat(),
+              'ratio': ratio
               }
     return report
 
