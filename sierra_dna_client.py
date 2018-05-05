@@ -68,7 +68,8 @@ def ptype_name(conn, ptype):
     """Return the name for a given patron type ID"""
     cur = conn.cursor()
     cur.execute("select description from sierra_view.ptype_property_name " +
-                "where ptype_id = '{}' and iii_language_id = 1".format(ptype))
+                "join sierra_view.ptype_property on id = ptype_id " +
+                "where value = '{}' and iii_language_id = 1".format(ptype))
     r = cur.fetchall()
     cur.close()
     return r[0][0]
