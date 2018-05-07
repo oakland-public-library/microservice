@@ -13,4 +13,4 @@ pass =
 mapbox_token =
 
 [user]
-timezone =
+timezone = America/Los_Angeles
