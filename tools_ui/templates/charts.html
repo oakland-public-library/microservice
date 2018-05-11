@@ -20,18 +20,19 @@
          },
          data: {
            x: "x",
-           xFormat: '%Y-%m-%dT%H:%M',
+           xFormat: '%Y-%m-%d',
            columns: {{ chart.data | safe }},
            types: {
-             transactions: "area-step",
-             foo: "area-step"
+             checkins: "area-step",
+             checkouts: "area-step",
+             renewals: "area-step"
            }
          },
          axis: {
            x: {
              type: "timeseries",
              tick: {
-               format: "%a %m/%d %H:%M"
+               format: "%a %m/%d"
              }
            }
          },

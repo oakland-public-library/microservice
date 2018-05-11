@@ -173,13 +173,22 @@ def branch(branch_id):
                            branches=branches, debug=True)
 
 
-@app.route('/chart/test')
-def test_b():
+@app.route('/chart/test/<loc>')
+def test_b(loc):
+    # loc = 'xxa'
     charts = []
     conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
-    c = circ_stats(conn, 'dm', 'i')
-    c.append(circ_stats(conn, 'dm', 'o')[1])
-    charts.append({'title': 'Circulation Transactions',
+    ci = circ_stats(conn, loc, 'i')
+    co = circ_stats(conn, loc, 'o')
+    cr = circ_stats(conn, loc, 'r')
+    c = [
+        ['x'] + ci['t'],
+        ['checkins'] + ci['v'],
+        ['checkouts'] + co['v'],
+        ['renewals'] + cr['v']
+        ]
+    charts.append({'title': 'Circulation Transactions: ' +
+                   'Item Location code = {}'.format(loc),
                    'data': c})
     conn.close()
     return render_template('charts.html', charts=charts, debug=True)
@@ -211,11 +220,8 @@ def circ_stats(conn, location, op_code):
     cur.execute(s)
     d = cur.fetchall()
     cur.close()
-    c = [
-        ['x'] + [x[0].strftime('%Y-%m-%dT%H:%M') for x in d],
-        ['transactions'] + [int(x[1]) for x in d]
-    ]
-    return c
+    return {'t': [x[0].strftime('%Y-%m-%d') for x in d],
+            'v': [int(x[1]) for x in d]}
 
 
 if __name__ == '__main__':
