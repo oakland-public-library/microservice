@@ -65,23 +65,55 @@ def item(record_id):
 @app.route('/patron/<record_id>')
 def patron_id(record_id):
     session = api.authenticate(API_KEY, API_SECRET)
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
     record = api.patron_record_by_id(session, record_id)
     holds = api.patron_holds(session, record.record_id)
-    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    holds_info = []
+    hr = [api.hold_record_by_id(session, h) for h in holds]
+    for x in hr:
+        if x.target_record_type_code == 'i':
+            i = api.item_record_by_id(session, x.target_record_id)
+            r = api.bib_record_by_id(session, i.bib_record)
+        elif x.target_record_type_code == 'j':
+            v = dna.bib_from_vol(conn, x.target_record_id)
+            r = api.bib_record_by_id(session, v)
+        else:
+            r = api.bib_record_by_id(session, x.target_record_id)
+        holds_info.append({'record': x.record_id,
+                           'target': x.target_record_id,
+                           'type': x.target_record_type_code,
+                           'title': r.title,
+                           'frozen': x.frozen})
     record.patron_type_name = dna.ptype_name(conn, record.patron_type)
     return render_template('patron_record.html', record=record, holds=holds,
-                           debug=True)
+                           holds_info=holds_info, debug=True)
 
 
 @app.route('/patron/barcode/<barcode>')
 def patron_bc(barcode):
     session = api.authenticate(API_KEY, API_SECRET)
+    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
     record = api.patron_record_by_barcode(session, barcode)
     holds = api.patron_holds(session, record.record_id)
-    conn = dna.authenticate(DNA_DB, DNA_USER, DNA_PASS, DNA_HOST, DNA_PORT)
+    holds_info = []
+    hr = [api.hold_record_by_id(session, h) for h in holds]
+    for x in hr:
+        if x.target_record_type_code == 'i':
+            i = api.item_record_by_id(session, x.target_record_id)
+            r = api.bib_record_by_id(session, i.bib_record)
+        elif x.target_record_type_code == 'j':
+            v = dna.bib_from_vol(conn, x.target_record_id)
+            r = api.bib_record_by_id(session, v)
+        else:
+            r = api.bib_record_by_id(session, x.target_record_id)
+        holds_info.append({'record': x.record_id,
+                           'target': x.target_record_id,
+                           'type': x.target_record_type_code,
+                           'title': r.title,
+                           'frozen': x.frozen})
     record.patron_type_name = dna.ptype_name(conn, record.patron_type)
     return render_template('patron_record.html', record=record, holds=holds,
-                           debug=True)
+                           holds_info=holds_info, debug=True)
 
 
 @app.route('/hold/<record_id>', methods=['GET', 'POST'])
