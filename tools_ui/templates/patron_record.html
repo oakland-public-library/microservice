@@ -16,8 +16,21 @@
     </div>
     <h3><i class="fas fa-hand-paper"></i> Holds</h3>
     <table>
-      {% for hold in holds %}
-      <tr><td><a href="/hold/{{hold}}">{{ hold }}</a></td></tr>
+      <tr>
+        <td class="field_name">Hold</td>
+        <td class="field_name">Type</td>
+        <td class="field_name">Target</td>
+        <td class="field_name">Title</td>
+        <td class="field_name">Frozen</td>
+      </tr>
+      {% for hold in holds_info %}
+      <tr>
+        <td><a href="/hold/{{ hold['record'] }}">{{ hold['record'] }}</a></td>
+        <td>{{ hold['type'] }}</td>
+        <td>{{ hold['target'] }}</td>
+        <td>{{ hold['title'] }}</td>
+        <td>{{ hold['frozen'] }}</td>
+      </tr>
       {% endfor %}
     </table>
     <h3><i class="fas fa-address-card"></i> Barcodes</h3>

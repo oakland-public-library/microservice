@@ -112,3 +112,15 @@ def branch_id_by_stat_group(conn, gid):
     r = cur.fetchone()
     cur.close()
     return r[0]
+
+
+def bib_from_vol(conn, vol):
+    """Return bib record from volume record """
+    cur = conn.cursor()
+    cur.execute("SELECT id2reckey(bv.bib_record_id) " +
+                "FROM sierra_view.bib_record_volume_record_link bv " +
+                "WHERE bv.volume_record_id = reckey2id('j{}')".format(vol))
+    r = cur.fetchone()
+    cur.close()
+    return r[0][1:]
+

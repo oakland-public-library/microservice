@@ -21,10 +21,10 @@ item_record_fields = {'fields': 'default,fixedFields,varFields,barcode,'
                       'callNumber,status,itemType,bibIds'}
 
 # Friendly names for record types
-record_types = {'i': 'Item', 'b': 'Bibliographic', 'v': 'Volume'}
+record_types = {'i': 'Item', 'b': 'Bibliographic', 'j': 'Volume'}
 
 # URL paths for record types
-hold_type_paths = {'i': 'item', 'b': 'bib', 'v': 'vol'}
+hold_type_paths = {'i': 'item', 'b': 'bib', 'j': 'vol'}
 
 
 class PatronRecord:
