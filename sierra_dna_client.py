@@ -124,3 +124,13 @@ def bib_from_vol(conn, vol):
     cur.close()
     return r[0][1:]
 
+
+def item_from_vol(conn, vol):
+    """Return first item record from volume record"""
+    cur = conn.cursor()
+    cur.execute("select id2reckey(vil.item_record_id) " +
+                "from sierra_view.volume_record_item_record_link vil " +
+                "where vil.volume_record_id = reckey2id('j{}') ".format(vol))
+    r = cur.fetchone()
+    cur.close()
+    return r[0][1:] if r else None

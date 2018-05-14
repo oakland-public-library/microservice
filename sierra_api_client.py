@@ -64,6 +64,7 @@ class ItemRecord:
         self.status_code = api_data['status']['code']
         self.item_type = api_data['itemType']
         self.bib_record = api_data['bibIds'][0]
+        self.vol = vol_from_api_data(self.api_data)
 
 
 class HoldRecord:
@@ -321,7 +322,15 @@ def bib_call_num(api_data):
 
 
 def pub_info(api_data):
+    """return concatenated pub info from subfields of p tagged varfield"""
     pub_data = [[y['content'] for y in x['subfields']]
                 for x in api_data['varFields'] if x['fieldTag'] == 'p']
     pub_data = ' '.join([x for sc in pub_data for x in sc])
     return pub_data
+
+
+def vol_from_api_data(api_data):
+    """return first v tagged volume in item varfields"""
+    vol = [x['content'] for x in api_data['varFields']
+           if x['fieldTag'] == 'v']
+    return vol[0] if vol else None

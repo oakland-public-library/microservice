@@ -76,13 +76,17 @@ def patron_id(record_id):
             r = api.bib_record_by_id(session, i.bib_record)
         elif x.target_record_type_code == 'j':
             v = dna.bib_from_vol(conn, x.target_record_id)
+            i = dna.item_from_vol(conn, x.target_record_id)
+            i = api.item_record_by_id(session, i)
             r = api.bib_record_by_id(session, v)
         else:
             r = api.bib_record_by_id(session, x.target_record_id)
+            i = None
         holds_info.append({'record': x.record_id,
                            'target': x.target_record_id,
                            'type': x.target_record_type_code,
-                           'title': r.title,
+                           'title': ' '.join
+                           (filter(None, (r.title, i.vol if i else None))),
                            'frozen': x.frozen})
     record.patron_type_name = dna.ptype_name(conn, record.patron_type)
     return render_template('patron_record.html', record=record, holds=holds,
@@ -103,13 +107,17 @@ def patron_bc(barcode):
             r = api.bib_record_by_id(session, i.bib_record)
         elif x.target_record_type_code == 'j':
             v = dna.bib_from_vol(conn, x.target_record_id)
+            i = dna.item_from_vol(conn, x.target_record_id)
+            i = api.item_record_by_id(session, i)
             r = api.bib_record_by_id(session, v)
         else:
             r = api.bib_record_by_id(session, x.target_record_id)
+            i = None
         holds_info.append({'record': x.record_id,
                            'target': x.target_record_id,
                            'type': x.target_record_type_code,
-                           'title': r.title,
+                           'title': ' '.join
+                           (filter(None, (r.title, i.vol if i else None))),
                            'frozen': x.frozen})
     record.patron_type_name = dna.ptype_name(conn, record.patron_type)
     return render_template('patron_record.html', record=record, holds=holds,
