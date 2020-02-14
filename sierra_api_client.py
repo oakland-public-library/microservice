@@ -10,7 +10,7 @@ api_limit = 1000
 
 # Which fields to retrieve for patron records. Certain fields may have
 # sensitive patron information.
-patron_api_fields = {'fields': 'default,fixedFields,barcodes'}
+patron_api_fields = {'fields': 'default,fixedFields,barcodes,names'}
 
 # Which fields to retrieve for bibliographic records.
 bib_record_fields = {'fields': 'default,fixedFields,varFields,normTitle,'
@@ -88,6 +88,17 @@ class HoldRecord:
         self.hold_type_path = hold_type_paths[self.target_record_type_code]
 
 
+class CheckoutRecord:
+    def __init__(self, api_data=None):
+        self.api_data = api_data
+        self.record_id = api_data['id'].split('/')[-1]
+        self.patron_record_id = api_data['patron'].split('/')[-1]
+        self.item_record_id = api_data['item'].split('/')[-1]
+        self.barcode = api_data['item'].split('/')[-1]
+        self.due_date = api_data['dueDate'].split('/')[-1]
+        self.out_date = api_data['outDate'].split('/')[-1]
+
+
 def authenticate(api_key, api_secret):
     auth = HTTPBasicAuth(api_key, api_secret)
     client = BackendApplicationClient(client_id=api_key)
@@ -116,6 +127,13 @@ def hold_record_by_id(session, hold_id):
     """Return the hold record for the given hold ID"""
     d = session.get(api_url_base + '/patrons/holds/{}'.format(str(hold_id)))
     r = HoldRecord(api_data=json.loads(d.text))
+    return r
+
+
+def checkout_record_by_id(session, checkout_id):
+    """Return the hold record for the given hold ID"""
+    d = session.get(api_url_base + '/patrons/checkouts/{}'.format(str(checkout_id)))
+    r = CheckoutRecord(api_data=json.loads(d.text))
     return r
 
 
@@ -334,3 +352,11 @@ def vol_from_api_data(api_data):
     vol = [x['content'] for x in api_data['varFields']
            if x['fieldTag'] == 'v']
     return vol[0] if vol else None
+
+
+def patron_checkouts(session, record_id):
+    """Return a list of checkout ids for the given patron"""
+    r = session.get('{}/patrons/{}/checkouts'.format(api_url_base, record_id))
+    entries = json.loads(r.text)['entries']
+    ids = [x['id'].split('/')[-1] for x in entries]
+    return ids
